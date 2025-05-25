@@ -1,16 +1,39 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/FaviconReco.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Reco es la plataforma líder en Guatemala para encontrar profesionales de confianza. Encuentra albañiles, plomeros, mecánicos y más." />
-    <meta name="keywords" content="profesionales, contratar, Guatemala, servicios, albañil, plomero, mecánico" />
-    <title>Reco | Profesionales de confianza</title>
-    <script type="module" crossorigin src="/assets/index-CoDU0UvI.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BqgLSr0a.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/FaviconReco.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Reco es la plataforma líder en Guatemala para encontrar profesionales de confianza. Encuentra albañiles, plomeros, mecánicos y más." />
+  <meta name="keywords" content="profesionales, contratar, Guatemala, servicios, albañil, plomero, mecánico" />
+  <title>Reco | Profesionales de confianza</title>
+  <script type="module" crossorigin src="/assets/index-Bpio9ct2.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BqgLSr0a.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+  <script>
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: '1182170543607800',
+        xfbml: true,
+        version: 'v22.0'
+      });
+      FB.AppEvents.logPageView();
+    };
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) { return; }
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
+</body>
+
 </html>
