@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Box, Container,IconButton, Alert } from '@mui/material';
+import { Box, Container, IconButton, Alert } from '@mui/material';
 import Grid from '@mui/material/Grid2'
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Form, Formik, FormikHelpers } from 'formik';
@@ -13,6 +13,7 @@ import { loginSuccess } from '../../../../redux/slices/authSlice';
 import { LoginValues } from '../../../../types/api/apiRequests';
 import AppLogo from '../../../../components/molecules/AppLogo';
 import { useLoginMutation } from '../../../../services/authApi';
+import FacebookLoginButton from './FacebookLoginButton';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ const Login: React.FC = () => {
         dispatch(loginSuccess({ user, token }));
         setSuccessMsg(t('auth.login.success'));
         navigate('/home');
-      } 
+      }
     } catch (error) {
       logger('error', error, 'Login.tsx.handleLogin', 'Web');
       setErrorMsg(error.data.message);
@@ -68,6 +69,7 @@ const Login: React.FC = () => {
       {showPassword ? <VisibilityOff /> : <Visibility />}
     </IconButton>
   );
+
 
   return (
     <Container
@@ -123,7 +125,7 @@ const Login: React.FC = () => {
                 direction="column"
                 justifyContent="center"
               >
-                <Grid size={{xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                   <InputAtom
                     name="email"
                     type="email"
@@ -135,7 +137,7 @@ const Login: React.FC = () => {
                     sx={{ width: '100%', maxWidth: '328px' }}
                   />
                 </Grid>
-                <Grid size={{xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                   <InputAtom
                     name="password"
                     type={showPassword ? 'text' : 'password'}
@@ -148,14 +150,14 @@ const Login: React.FC = () => {
                     sx={{ width: '100%', maxWidth: '328px' }}
                   />
                 </Grid>
-                <Grid size={{xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                   {(errorMsg || successMsg) && (
                     <Alert severity={errorMsg ? 'error' : 'success'}>
                       {errorMsg || successMsg}
                     </Alert>
                   )}
                 </Grid>
-                <Grid size={{xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                   <ButtonAtom
                     type="submit"
                     variant="filled"
@@ -171,7 +173,7 @@ const Login: React.FC = () => {
                     {t('auth.login.title')}
                   </ButtonAtom>
                 </Grid>
-                <Grid size={{xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                   <ButtonAtom
                     type="button"
                     variant="text"
@@ -186,8 +188,22 @@ const Login: React.FC = () => {
                     {t('auth.login.forgot_password')}
                   </ButtonAtom>
                 </Grid>
-                <Box sx={{ height: '191px' }} />
-                <Grid size={{xs: 12}}
+                <Box sx={{ height: '45%' }} />
+                <Box>
+                  <FacebookLoginButton
+                    onLoginSuccess={(data) => {
+                      console.log('Facebook login success:', data);
+                      dispatch(loginSuccess(data));
+                      navigate('/home');
+                    }}
+                    onLoginFailure={(err) => {
+                      console.error('Facebook login failed:', err);
+                      setErrorMsg(t('auth.login.facebook_error'));
+                    }
+                    }
+                  />
+                </Box>
+                <Grid size={{ xs: 12 }}
                   sx={{
                     display: 'flex',
                     flexDirection: 'row',

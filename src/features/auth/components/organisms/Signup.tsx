@@ -13,6 +13,7 @@ import { useSignupMutation } from '../../../../services/authApi';
 import { useLoginMutation } from '../../../../services/authApi';
 import { useAppDispatch } from '../../../../hooks/useAppDispatch';
 import { loginSuccess } from '../../../../redux/slices/authSlice';
+import FacebookLoginButton from './FacebookLoginButton';
 
 type SignupValues = {
   email: string;
@@ -222,7 +223,7 @@ const Signup: React.FC = () => {
                       style={{ marginRight: 8 }}
                     />
                     <TextAtom variant="body" size="medium">
-                      Acepto los 
+                      Acepto los
                       <ButtonAtom
                         type="button"
                         variant="text"
@@ -235,8 +236,8 @@ const Signup: React.FC = () => {
                           display: 'inline',
                         }}
                       >
-                        
-                          Términos y Condiciones
+
+                        Términos y Condiciones
                       </ButtonAtom>
                     </TextAtom>
                   </Box>
@@ -268,8 +269,20 @@ const Signup: React.FC = () => {
                     {t('auth.register.signup_title_button')}
                   </ButtonAtom>
                 </Grid>
-                
-                <Box sx={{ height: '191px' }} />
+
+                <Box sx={{ height: '45%' }} />
+                <FacebookLoginButton
+                  onLoginSuccess={(data) => {
+                    console.log('Facebook login success:', data);
+                    dispatch(loginSuccess(data));
+                    navigate('/home');
+                  }}
+                  onLoginFailure={(err) => {
+                    console.error('Facebook login failed:', err);
+                    setErrorMsg(t('auth.login.facebook_error'));
+                  }
+                  }
+                />
                 <Grid
                   size={{ xs: 12 }}
                   sx={{

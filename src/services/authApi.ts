@@ -45,6 +45,19 @@ export const authApi = createApi({
         },
       }),
     }),
+    facebookLogin: builder.mutation<
+      ApiResponseType<{ user: User; token: string; refreshToken: string }>,
+      { accessToken: string }
+    >({
+      query: (body) => ({
+        url: 'facebook/',
+        method: 'POST',
+        body,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    }),
   }),
 });
 
@@ -53,4 +66,5 @@ export const {
   useRequestPasswordResetMutation,
   useUpdatePasswordMutation,
   useSignupMutation,
+  useFacebookLoginMutation,
 } = authApi;

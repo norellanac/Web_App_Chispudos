@@ -34,7 +34,9 @@
     "login": {
       "dont_have_account": "¿No tienes una cuenta?",
       "email": "Correo electrónico",
+      "facebook_error": "",
       "forgot_password": "¿Olvidaste tu contraseña?",
+      "login_with_facebook": "Continuar con Facebook",
       "password": "Contraseña",
       "register": "Registrarse",
       "success": "",
@@ -68,7 +70,10 @@
       "update": "Actualizar Contraseña"
     },
     "slider_intro": {
-      "title_1": "Encuentra al experto que necesitas en pocos minutos."
+      "title_1": "Encuentra al experto que necesitas en pocos minutos.",
+      "title_2": "Ahorra tiempo y dinero al contratar servicios de calidad.",
+      "title_3": "Recibe atención personalizada y soporte al cliente.",
+      "title_4": "Descubre una amplia variedad de servicios a tu alcance."
     },
     "updateSuccess": {
       "body": "¡Genial! Ya puedes iniciar sesión con tu nueva contraseña. Haz clic en continuar.",
@@ -180,6 +185,9 @@
     "mason": "",
     "mechanic": "",
     "plumber": ""
+  },
+  "common": {
+    "loading": ""
   },
   "components": {
     "molecules": {

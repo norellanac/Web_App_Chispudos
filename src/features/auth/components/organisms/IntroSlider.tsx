@@ -10,6 +10,15 @@ import introSliderImg2 from '../../../../assets/images/intro_sliders/intro_2.png
 import introSliderImg3 from '../../../../assets/images/intro_sliders/intro_3.png';
 import introSliderImg4 from '../../../../assets/images/intro_sliders/intro_4.png';
 
+
+// i18next-parser-start
+// t('auth.slider_intro.title_1', 'Welcome to our app! Explore the features and enjoy the experience.')
+// t('auth.slider_intro.title_2', 'Discover amazing services tailored just for you.')
+// t('auth.slider_intro.title_3', 'Connect with professionals and get the help you need.')
+// t('auth.slider_intro.title_4', 'Join our community and start your journey today!')
+// i18next-parser-end
+
+
 const slides = [
   { title: 'auth.slider_intro.title_1', image: introSliderImg1 },
   { title: 'auth.slider_intro.title_2', image: introSliderImg2 },

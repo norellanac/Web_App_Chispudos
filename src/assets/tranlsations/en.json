@@ -34,7 +34,9 @@
     "login": {
       "dont_have_account": "Don't have an account?",
       "email": "Email",
+      "facebook_error": "",
       "forgot_password": "Forgot your password?",
+      "login_with_facebook": "Continue with Facebook",
       "password": "Password",
       "register": "Register",
       "success": "",
@@ -68,7 +70,10 @@
       "update": "Update Password"
     },
     "slider_intro": {
-      "title_1": "Find the expert you need in minutes."
+      "title_1": "Find the expert you need in minutes.",
+      "title_2": "Discover amazing services tailored just for you.",
+      "title_3": "Connect with professionals and get the help you need.",
+      "title_4": "Join our community and start your journey today!"
     },
     "updateSuccess": {
       "body": "¡Congratulations! Your password has been changed. Click continue to login",
@@ -180,6 +185,9 @@
     "mason": "",
     "mechanic": "",
     "plumber": ""
+  },
+  "common": {
+    "loading": ""
   },
   "components": {
     "molecules": {

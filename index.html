@@ -1,15 +1,38 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/FaviconReco.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Reco es la plataforma líder en Guatemala para encontrar profesionales de confianza. Encuentra albañiles, plomeros, mecánicos y más." />
-    <meta name="keywords" content="profesionales, contratar, Guatemala, servicios, albañil, plomero, mecánico" />
-    <title>Reco | Profesionales de confianza</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/FaviconReco.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Reco es la plataforma líder en Guatemala para encontrar profesionales de confianza. Encuentra albañiles, plomeros, mecánicos y más." />
+  <meta name="keywords" content="profesionales, contratar, Guatemala, servicios, albañil, plomero, mecánico" />
+  <title>Reco | Profesionales de confianza</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+  <script>
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: '%VITE_FACEBOOK_APP_ID%',
+        xfbml: true,
+        version: '%VITE_FACEBOOK_SDK_VERSION%'
+      });
+      FB.AppEvents.logPageView();
+    };
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) { return; }
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  </script>
+</body>
+
 </html>
