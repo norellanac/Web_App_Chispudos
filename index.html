@@ -14,6 +14,23 @@
 </head>
 
 <body>
+            <script>
+              // Handle redirect from 404.html
+              (function() {
+                var redirectPath = null;
+                var search = window.location.search;
+                if (search.indexOf('?') === 0) {
+                  // Get the path from the redirect
+                  redirectPath = search.substr(1);
+                  
+                  // Replace the URL in the address bar without reloading
+                  if (redirectPath) {
+                    history.replaceState(null, null, '/' + redirectPath);
+                  }
+                }
+              })();
+            </script>
+          
   <div id="root"></div>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
   <script>
