@@ -1,30 +1,89 @@
-import { Box, Container, Grid } from '@mui/material';
-import { Field, Form, Formik } from 'formik';
+import React, { useCallback, useState } from 'react';
+import { Box, Container, IconButton, Alert, ToggleButton, ToggleButtonGroup, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Form, Formik, FormikHelpers } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { ButtonAtom, InputAtom, TextAtom } from '../../../../components/atoms';
+import { useAppDispatch } from '../../../../hooks/useAppDispatch';
+import { logger } from '../../../../utils/logger';
+import { loginSuccess } from '../../../../redux/slices/authSlice';
+import AppLogo from '../../../../components/molecules/AppLogo';
+import { useLoginMutation } from '../../../../services/authApi';
 
-interface LoginProps {
-  onLogin: () => void;
-}
+const DIAL_CODES = [
+  { code: '+502', label: '🇬🇹 +502' }, { code: '+1', label: '🇺🇸 +1' },
+  { code: '+52', label: '🇲🇽 +52' },  { code: '+503', label: '🇸🇻 +503' },
+  { code: '+504', label: '🇭🇳 +504' }, { code: '+505', label: '🇳🇮 +505' },
+  { code: '+506', label: '🇨🇷 +506' }, { code: '+507', label: '🇵🇦 +507' },
+  { code: '+57', label: '🇨🇴 +57' },  { code: '+54', label: '🇦🇷 +54' },
+  { code: '+55', label: '🇧🇷 +55' },  { code: '+56', label: '🇨🇱 +56' },
+  { code: '+34', label: '🇪🇸 +34' },  { code: '+44', label: '🇬🇧 +44' },
+];
 
-const validationSchema = Yup.object({
-  username: Yup.string()
-    .matches(
-      /^[a-zA-Z0-9_]+$/,
-      'Username can only contain letters, numbers, and underscores',
-    )
-    .required('Username is required'),
+type LoginMethod = 'email' | 'phone';
 
-  password: Yup.string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Password is required'),
-});
-
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC = () => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const [login, { isLoading }] = useLoginMutation();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
+  const [dialCode, setDialCode] = useState('+502');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const validationSchema = Yup.object({
+    email: loginMethod === 'email'
+      ? Yup.string().email(t('forms.commons.email')).required(t('forms.commons.required'))
+      : Yup.string(),
+    phoneNumber: loginMethod === 'phone'
+      ? Yup.string().min(6).required(t('forms.commons.required'))
+      : Yup.string(),
+    password: Yup.string()
+      .min(6, t('forms.commons.min_length', { min: 6 }))
+      .required(t('forms.commons.required')),
+  });
+
+  const handleLogin = async (values: any) => {
+    try {
+      const credential = loginMethod === 'email'
+        ? { email: values.email }
+        : { phone: `${dialCode}${values.phoneNumber}` };
+      const result = await login({ ...credential, password: values.password } as any).unwrap();
+      if (result.success) {
+        const { accessToken, refreshToken, user } = result.data;
+        dispatch(loginSuccess({ user, accessToken, refreshToken }));
+        setSuccessMsg(t('auth.login.success'));
+        navigate('/home');
+      }
+    } catch (error: any) {
+      logger('error', error, 'Login.tsx.handleLogin', 'Web');
+      setErrorMsg(error?.data?.message || t('auth.login.error', 'Login failed'));
+    }
+  };
+
+  const handleSubmit = async (values: any, { setSubmitting }: FormikHelpers<any>) => {
+    await handleLogin(values);
+    setSubmitting(false);
+  };
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  const rightIcon = (
+    <IconButton
+      onClick={togglePasswordVisibility}
+      onMouseDown={(e) => e.preventDefault()}
+      edge="end"
+    >
+      {showPassword ? <VisibilityOff /> : <Visibility />}
+    </IconButton>
+  );
 
   return (
     <Container
@@ -62,37 +121,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             alignItems: 'center',
             gap: '10px',
             mb: '30px',
-            width: '181.47px',
-            height: '36.9px',
           }}
         >
-          <TextAtom
-            onClick={() => navigate('/')}
-            variant="display"
-            size="large"
-            sx={{
-              color: '#6750A4',
-              fontWeight: 'bold',
-            }}
-          >
-            Workoo
-          </TextAtom>
+          <AppLogo maxWidth="250px" />
         </Box>
         <Box sx={{ height: '100px' }} />
         <Formik
-          initialValues={{ username: '', password: '' }}
+          initialValues={{ email: '', phoneNumber: '', password: '' }}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, setFieldError }) => {
-            try {
-              onLogin();
-              navigate('/app/home');
-            } catch {
-              setFieldError('username', t('loginScreen.errorOccurred'));
-              setFieldError('password', t('loginScreen.errorOccurred'));
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
           {({ isSubmitting, touched, errors }) => (
             <Form style={{ width: '350px' }}>
@@ -102,40 +139,85 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 direction="column"
                 justifyContent="center"
               >
-                <Grid item xs={12}>
-                  <Field
-                    as={InputAtom}
-                    name="username"
-                    variant="underlined"
-                    label={t('auth.login.email')}
-                    placeholder={t('auth.login.email')}
-                    error={touched.username && !!errors.username}
-                    helperText={errors.username}
+                {/* Email / Phone toggle */}
+                <Grid size={{ xs: 12 }}>
+                  <ToggleButtonGroup
+                    value={loginMethod}
+                    exclusive
+                    onChange={(_, v) => { if (v) setLoginMethod(v); }}
+                    size="small"
                     fullWidth
-                    sx={{ width: '100%', maxWidth: '328px' }}
-                  />
+                  >
+                    <ToggleButton value="email" sx={{ textTransform: 'none', flex: 1 }}>
+                      {t('auth.login.email_toggle', 'Email')}
+                    </ToggleButton>
+                    <ToggleButton value="phone" sx={{ textTransform: 'none', flex: 1 }}>
+                      {t('auth.login.phone_toggle', 'Phone')}
+                    </ToggleButton>
+                  </ToggleButtonGroup>
                 </Grid>
-                <Grid item xs={12}>
-                  <Field
-                    as={InputAtom}
+
+                {loginMethod === 'email' ? (
+                  <Grid size={{ xs: 12 }}>
+                    <InputAtom
+                      name="email"
+                      type="email"
+                      variant="underlined"
+                      label={t('auth.login.email')}
+                      placeholder={t('auth.login.email')}
+                      errorMsg={errors.email}
+                      fullWidth
+                      sx={{ width: '100%', maxWidth: '328px' }}
+                    />
+                  </Grid>
+                ) : (
+                  <Grid size={{ xs: 12 }}>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <InputLabel>{t('auth.login.dial_code', 'Code')}</InputLabel>
+                        <Select value={dialCode} label={t('auth.login.dial_code', 'Code')} onChange={(e) => setDialCode(e.target.value)} MenuProps={{ PaperProps: { style: { maxHeight: 240 } } }}>
+                          {DIAL_CODES.map((d) => <MenuItem key={d.code} value={d.code}>{d.label}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                      <InputAtom
+                        name="phoneNumber"
+                        type="tel"
+                        variant="underlined"
+                        label={t('auth.login.phone', 'Phone number')}
+                        placeholder="1234 5678"
+                        errorMsg={(errors as any).phoneNumber}
+                        fullWidth
+                      />
+                    </Box>
+                  </Grid>
+                )}
+
+                <Grid size={{xs: 12}}>
+                  <InputAtom
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     variant="underlined"
                     label={t('auth.login.password')}
                     placeholder={t('auth.login.password')}
-                    error={touched.password && !!errors.password}
-                    helperText={errors.password}
+                    errorMsg={errors.password || errorMsg}
+                    rightIcon={rightIcon}
                     fullWidth
                     sx={{ width: '100%', maxWidth: '328px' }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{xs: 12}}>
+                  {(errorMsg || successMsg) && (
+                    <Alert severity={errorMsg ? 'error' : 'success'}>
+                      {errorMsg || successMsg}
+                    </Alert>
+                  )}
+                </Grid>
+                <Grid size={{xs: 12}}>
                   <ButtonAtom
                     type="submit"
                     variant="filled"
                     fullWidth
                     disabled={isSubmitting}
-                    onClick={onLogin}
                     sx={{
                       mt: 2,
                       width: '100%',
@@ -146,12 +228,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     {t('auth.login.title')}
                   </ButtonAtom>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{xs: 12}}>
                   <ButtonAtom
                     type="button"
                     variant="text"
                     fullWidth
-                    onClick={() => console.log('Button clicked!')}
+                    onClick={() => navigate('/password-recovery')}
                     sx={{
                       width: '100%',
                       maxWidth: '328px',
@@ -162,9 +244,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   </ButtonAtom>
                 </Grid>
                 <Box sx={{ height: '191px' }} />
-                <Grid
-                  item
-                  xs={12}
+                <Grid size={{xs: 12}}
                   sx={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -186,6 +266,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <ButtonAtom
                       type="button"
                       variant="text"
+                      disabled={isSubmitting || isLoading}
                       onClick={() => navigate('/register')}
                       sx={{ ml: 1, textTransform: 'none', fontSize: 'inherit' }}
                     >

@@ -1,24 +1,20 @@
-import React from 'react';
-
 import { ReactNode } from 'react';
 import ResponsiveAppBar from '../organisms/AppBar';
-import LanguageSwitcher from '../../../../components/molecules/LanguajeSwitcher';
-import { useTranslation } from 'react-i18next';
+import { Box } from '@mui/material';
 
 interface Props {
   children: ReactNode;
 }
 
 export const LandingLayout = ({ children }: Props) => {
-  const { t } = useTranslation();
   return (
-    <div>
+    <Box sx={{ flexGrow: 1 }} mx={2}>
       <ResponsiveAppBar />
-      <LanguageSwitcher />
-
-      <h1>{t('welcome')}</h1>
-      <button>{t('login')}</button>
+      <Box
+        sx={{ marginTop: '64px' }}
+      >
       {children}
-    </div>
+      </Box>
+    </Box>
   );
 };

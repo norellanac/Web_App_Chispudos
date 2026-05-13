@@ -1,14 +1,15 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-export const api = createApi({
-  reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: 'https://jsonplaceholder.typicode.com/',
-  }),
-  endpoints: (builder) => ({
-    getExampleData: builder.query<any, void>({
-      query: () => 'users/1',
-    }),
-    // Add other endpoints here
-  }),
-});
-export const { useGetExampleDataQuery } = api;
+import { authApi } from './authApi';
+import { productApi } from './productApi';
+import { categoryApi } from './categoryApi';
+import { userApi } from './userApi';
+import { ordersApi } from './ordersApi';
+import { locationsApi } from './locationsApi';
+
+export const api = {
+  authApi,
+  productApi,
+  categoryApi,
+  ordersApi,
+  userApi,
+  locationsApi,
+};

@@ -1,10 +1,13 @@
-import Signup from '../organisms/Signup';
+import React from 'react';
+import Signup from './../organisms/Signup';
 import AuthLayout from '../templates/AuthLayout';
 
-export const RegisterPage = () => {
+const RegisterPage: React.FC = () => {
   return (
     <AuthLayout>
       <Signup />
     </AuthLayout>
   );
 };
+
+export default RegisterPage;

@@ -3,13 +3,17 @@ import { SxProps, Theme, useTheme } from '@mui/material/styles';
 import React from 'react';
 
 export interface ButtonAtomProps {
-  onClick: () => void;
-  children: React.ReactNode;
+  onClick?: () => void;
+  children?: React.ReactNode;
   variant?: 'filled' | 'outlined' | 'text' | 'elevated' | 'tonal';
   disabled?: boolean;
   sx?: SxProps<Theme>;
   type?: 'button' | 'submit' | 'reset';
   fullWidth?: boolean;
+  startIcon?: React.ReactNode;
+  endIcon?: React.ReactNode;
+  size?: 'small' | 'medium' | 'large';
+  title?: string;
 }
 
 const ButtonAtom: React.FC<ButtonAtomProps> = ({
@@ -20,6 +24,10 @@ const ButtonAtom: React.FC<ButtonAtomProps> = ({
   sx,
   type = 'button',
   fullWidth,
+  startIcon,
+  size = 'small',
+  endIcon,
+  title = children?.toString() || '',
   ...props
 }) => {
   const theme = useTheme();
@@ -45,6 +53,10 @@ const ButtonAtom: React.FC<ButtonAtomProps> = ({
       disabled={disabled}
       type={type}
       fullWidth={fullWidth}
+      startIcon={startIcon}
+      endIcon={endIcon}
+      size={size}
+      title={title}
       {...props}
       sx={{
         borderRadius: '100px',

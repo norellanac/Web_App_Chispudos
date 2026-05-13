@@ -1,0 +1,31 @@
+#mc_embed_signup {
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+#mc_embed_signup h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+#mc_embed_signup input.email {
+  width: 80%;
+  padding: 15px;
+  margin-bottom: 10px;
+  border: 1px solid #ffffff ;
+  border-radius: 30px;
+}
+#mc_embed_signup input.button {
+  background-color: #5d50c6;
+  margin-top: 10px;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+#mc_embed_signup input.button:hover {
+  background-color: #4b2e83;
+}

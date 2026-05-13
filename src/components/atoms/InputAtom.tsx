@@ -1,30 +1,56 @@
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { IconButton, InputAdornment, TextField } from '@mui/material';
+import { InputAdornment, TextField, TextFieldProps, MenuItem, Checkbox, ListItemText } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import React, { useState } from 'react';
+import React from 'react';
 import TextAtom from './TextAtom';
+import { Field } from 'formik';
 
-type AuthInputFieldProps = {
+interface SelectOption {
+  value: string | number;
+  label: string;
+}
+
+interface InputAtomProps extends Omit<TextFieldProps, 'variant'> {
   variant: 'outlined' | 'underlined' | 'rounded';
   label: string;
   placeholder: string;
   leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   errorMsg?: string;
-  helperText?: string;
-  error?: boolean;
+  helperText?: string | undefined
+  name: string;
   type?: string;
-};
+  // Text area specific props
+  multiline?: boolean;
+  rows?: number;
+  maxRows?: number;
+  // Select-specific props
+  isSelect?: boolean;
+  options?: SelectOption[];
+  multiple?: boolean;
+  renderValue?: (selected: unknown) => React.ReactNode;
+  showCheckbox?: boolean;
+}
 
-const AuthInputField: React.FC<AuthInputFieldProps> = ({
+const InputAtom: React.FC<InputAtomProps> = ({
   variant,
   label,
   placeholder,
   leftIcon,
+  rightIcon,
   errorMsg,
   helperText,
-  error,
   type = 'text',
+  name,
+  // Multiline props
+  multiline = false,
+  rows = 4,
+  maxRows,
+  // Select props
+  isSelect = false,
+  options = [],
+  multiple = false,
+  renderValue,
+  showCheckbox = true,
   ...props
 }) => {
   const theme = useTheme();
@@ -45,10 +71,13 @@ const AuthInputField: React.FC<AuthInputFieldProps> = ({
             '&.Mui-focused fieldset': {
               borderColor: theme.palette.primary.light,
             },
-            ...(error && {
+            ...(errorMsg && {
               '& fieldset': {
                 borderColor: theme.palette.error.main,
               },
+            }),
+            ...(multiline && {
+              padding: '8px 14px',
             }),
           },
         };
@@ -64,7 +93,7 @@ const AuthInputField: React.FC<AuthInputFieldProps> = ({
           '& .MuiInput-underline.Mui-focused:before': {
             borderBottomColor: theme.palette.secondary.light,
           },
-          ...(error && {
+          ...(errorMsg && {
             '&:before': {
               borderBottomColor: theme.palette.error.main,
             },
@@ -75,7 +104,7 @@ const AuthInputField: React.FC<AuthInputFieldProps> = ({
           borderRadius: '100px',
           width: '100%',
           '& .MuiOutlinedInput-root': {
-            borderRadius: '100px',
+            borderRadius: multiline ? '16px' : '100px', // Adjust border radius for multiline
             '& fieldset': {
               borderColor: theme.palette.tertiary.main,
             },
@@ -85,7 +114,7 @@ const AuthInputField: React.FC<AuthInputFieldProps> = ({
             '&.Mui-focused fieldset': {
               borderColor: theme.palette.tertiary.light,
             },
-            ...(error && {
+            ...(errorMsg && {
               '& fieldset': {
                 borderColor: theme.palette.error.main,
               },
@@ -97,44 +126,120 @@ const AuthInputField: React.FC<AuthInputFieldProps> = ({
     }
   };
 
+  // Default renderValue function for multiple select
+  const defaultRenderValue = (selected: unknown) => {
+    if (!Array.isArray(selected)) return '';
+
+    return selected.map(value => {
+      const option = options.find(opt => opt.value === value);
+      return option?.label || value;
+    }).join(', ');
+  };
+
   return (
-    <TextField
-      variant={variant === 'underlined' ? 'standard' : 'outlined'}
-      label={label}
-      placeholder={placeholder}
-      error={error || !!errorMsg}
-      helperText={
-        errorMsg ? (
-          <TextAtom variant="body" size="small">
-            {errorMsg}
-          </TextAtom>
-        ) : helperText ? (
-          <TextAtom variant="body" size="small">
-            {helperText}
-          </TextAtom>
-        ) : undefined
-      }
-      {...props}
-      InputProps={{
-        startAdornment: leftIcon ? (
-          <InputAdornment position="start">{leftIcon}</InputAdornment>
-        ) : null,
-        endAdornment:
-          type === 'password' ? (
-            <InputAdornment position="end">
-              <IconButton
-                onClick={() => console.log('Show password')}
-                onMouseDown={(e) => e.preventDefault()}
-                edge="end"
-              >
-                {true ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ) : null,
-      }}
-      sx={getInputStyles()}
-    />
+    <Field name={name}>
+      {({ field, form: { isSubmitting, setFieldValue } }) => (
+        isSelect ? (
+          <TextField
+            select
+            {...field}
+            label={label}
+            placeholder={placeholder}
+            error={!!errorMsg}
+            disabled={isSubmitting}
+            variant={variant === 'underlined' ? 'standard' : 'outlined'}
+            helperText={
+              errorMsg ? (
+                <TextAtom variant="body" size="small">
+                  {errorMsg}
+                </TextAtom>
+              ) : helperText ? (
+                <TextAtom variant="body" size="small">
+                  {helperText}
+                </TextAtom>
+              ) : undefined
+            }
+            SelectProps={{
+              multiple,
+              renderValue: renderValue || (multiple ? defaultRenderValue : undefined),
+              displayEmpty: false,
+              startAdornment: leftIcon ? (
+                <InputAdornment position="start">{leftIcon}</InputAdornment>
+              ) : undefined,
+              endAdornment: rightIcon ? (
+                <InputAdornment position="end">{rightIcon}</InputAdornment>
+              ) : undefined,
+            }}
+            {...props}
+            sx={[
+              getInputStyles(),
+              // Add additional padding for outlined and rounded variants
+              variant !== 'underlined' && {
+                '& .MuiOutlinedInput-root': {
+                  pt: 0.5, // Add some padding to the top
+                }
+              },
+              ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+            ]}
+            onChange={e => {
+              // Handle Formik field change
+              setFieldValue(name, e.target.value);
+            }}
+          >
+            {placeholder && (
+              <MenuItem value="" disabled>
+                {placeholder}
+              </MenuItem>
+            )}
+            {options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {multiple && showCheckbox && (
+                  <Checkbox checked={field.value?.includes(option.value)} />
+                )}
+                <ListItemText primary={option.label} />
+              </MenuItem>
+            ))}
+          </TextField>
+        ) : (
+          <TextField
+            {...field}
+            type={type}
+            variant={variant === 'underlined' ? 'standard' : 'outlined'}
+            label={label}
+            placeholder={placeholder}
+            error={!!errorMsg}
+            disabled={isSubmitting}
+            multiline={multiline}
+            rows={rows}
+            maxRows={maxRows}
+            helperText={
+              errorMsg ? (
+                <TextAtom variant="body" size="small">
+                  {errorMsg}
+                </TextAtom>
+              ) : helperText ? (
+                <TextAtom variant="body" size="small">
+                  {helperText}
+                </TextAtom>
+              ) : undefined
+            }
+            InputProps={{
+              startAdornment: leftIcon ? (
+                <InputAdornment position="start">{leftIcon}</InputAdornment>
+              ) : undefined,
+              endAdornment: rightIcon ? (
+                <InputAdornment position="end">{rightIcon}</InputAdornment>
+              ) : undefined,
+            }}
+            sx={[
+              getInputStyles(),
+              ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+            ]}
+          />
+        )
+      )}
+    </Field>
   );
 };
 
-export default AuthInputField;
+export default InputAtom;

@@ -5,7 +5,6 @@ import { selectAuth } from '../../redux/slices/authSlice';
 
 const ProtectedRoutesWrapper: React.FC = () => {
   const authState = useAppSelector(selectAuth);
-  console.error('ProtectedRoutesWrapper ', authState);
 
   return authState.isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
 };

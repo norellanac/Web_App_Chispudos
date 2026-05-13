@@ -1,6 +1,7 @@
 'use client';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, Theme } from '@mui/material/styles';
 import { textTheme } from './textTheme';
+import { BrandingColors } from '../types/branding';
 
 export const lightTheme = createTheme({
   palette: {
@@ -30,7 +31,7 @@ export const lightTheme = createTheme({
       contrastText: '#FFFFFF',
     },
     background: {
-      default: '#FFFBFE',
+      default: '#FFFFFF',
       paper: '#FFFFFF',
     },
     text: {
@@ -70,3 +71,81 @@ export const lightTheme = createTheme({
     },
   },
 });
+
+export const createLightTheme = (
+  colors: BrandingColors,
+  fontFamily?: string,
+  buttonBorderRadius?: number,
+): Theme =>
+  createTheme({
+    palette: {
+      mode: 'light',
+      primary: {
+        main: colors.primary,
+        light: colors.primaryContainer,
+        dark: colors.primary,
+        contrastText: colors.onPrimary,
+      },
+      secondary: {
+        main: colors.secondary,
+        light: colors.secondaryContainer,
+        dark: colors.secondary,
+        contrastText: colors.onSecondary,
+      },
+      tertiary: {
+        main: colors.tertiary,
+        light: colors.tertiaryContainer,
+        dark: colors.tertiary,
+        contrastText: colors.onTertiary,
+      },
+      error: {
+        main: colors.error,
+        light: colors.errorContainer,
+        dark: colors.error,
+        contrastText: '#FFFFFF',
+      },
+      background: {
+        default: colors.background,
+        paper: colors.surface,
+      },
+      text: {
+        primary: colors.textPrimary,
+        secondary: colors.textSecondary,
+      },
+      action: {
+        disabledBackground: '#E3E0E3',
+        disabled: '#979598',
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius:
+              buttonBorderRadius !== undefined
+                ? `${buttonBorderRadius}px`
+                : '100px',
+          },
+          contained: {
+            '&.Mui-disabled': {
+              backgroundColor: '#E3E0E3',
+              color: '#979598',
+            },
+          },
+        },
+      },
+    },
+    typography: {
+      ...textTheme,
+      ...(fontFamily ? { fontFamily } : {}),
+    },
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 600,
+        md: 960,
+        lg: 1280,
+        xl: 1920,
+      },
+    },
+  });

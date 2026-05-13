@@ -1,13 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { UserLayout } from '../../../../components/templates/UserLayout';
+import UserProfile from '../organisms/UserProfile';
 
 export const ProfilePage = () => {
-  const navigate = useNavigate();
   return (
-    <div>
-      <h1>Profile Page</h1>
-      <button onClick={() => navigate('/home')}>Home</button>
-      <button onClick={() => navigate('/')}>Landing</button>
-    </div>
+    <UserLayout>
+      <UserProfile />
+    </UserLayout>
   );
 };
