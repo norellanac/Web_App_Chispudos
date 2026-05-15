@@ -383,14 +383,24 @@
     "changeProfilePhoto": "Change profile photo",
     "editName": "Edit Name",
     "editNameTitle": "Edit Name",
+    "editProfile": "Edit Profile",
+    "editProfileTitle": "Edit Profile",
     "email": "Email",
+    "emailInvalid": "Invalid email format",
+    "emailPhoneRequired": "At least email or phone is required",
     "lastname": "Lastname",
-    "logout": "Logout",
+    "logout": "Sign out",
     "name": "Name",
+    "phone": "Phone",
+    "phoneInvalid": "Invalid phone format",
+    "roleMerchant": "Professional",
+    "roleUser": "User",
     "save": "Save",
     "switchToMerchant": "Become a Professional",
     "switchToUser": "Switch to User",
-    "updateButton": "Update"
+    "updateButton": "Update",
+    "updateError": "Failed to update profile",
+    "updateSuccess": "Profile updated successfully"
   },
   "welcomeBanner": {
     "greeting": "Hello, {{userName}}! What do you need to solve today?"

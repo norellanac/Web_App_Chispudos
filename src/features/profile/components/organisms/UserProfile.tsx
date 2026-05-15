@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { List, ListItem, TextField } from '@mui/material';
+import { List, ListItem, TextField, Alert, Snackbar, useTheme, Paper, FormControl, InputLabel, Select, MenuItem, Box, Chip } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import LogoutIcon from '@mui/icons-material/Logout';
 import Grid from '@mui/material/Grid2';
 import { ButtonAtom, TextAtom } from '../../../../components/atoms';
 import {
@@ -14,20 +15,33 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useHasRole } from '../../../../hooks/useHasRole';
 import { useUserEvents } from '../../../auth/hooks/authHooks';
+import { DIAL_CODES } from '../../../../utils/dialCodes';
+import EditIcon from '@mui/icons-material/Edit';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^\d[\d\s\-().]{3,}$/;
 
 export const UserProfile: React.FC = () => {
   const { t } = useTranslation();
-  // const dispatch = useAppDispatch();
+  const theme = useTheme();
   const { logoutUser, handleUpdateUserInfo } = useUserEvents();
   const { user } = useAppSelector(selectAuth);
   const navigate = useNavigate();
 
   const isMerchant = useHasRole('Merchant');
 
-  const [editNameModalOpen, setEditNameModalOpen] = useState(false);
+  // Edit profile modal state
+  const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [lastname, setLastname] = useState(user?.lastname || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [dialCode, setDialCode] = useState('+502');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState('');
+  const [successOpen, setSuccessOpen] = useState(false);
 
+  // Avatar modal state
   const [modalOpen, setModalOpen] = useState(false);
   const {
     selectedImage,
@@ -39,18 +53,75 @@ export const UserProfile: React.FC = () => {
   } = useAvatarUpload({ userId: user?.id?.toString() || '' });
 
   const handleCloseModal = () => setModalOpen(false);
-  const handleSaveClick = async () => {
+  const handleSaveAvatarClick = async () => {
     if (selectedImage) {
       await handleSaveImage();
       handleCloseModal();
     }
   };
 
-  const handleOpenEditNameModal = () => setEditNameModalOpen(true);
-  const handleCloseEditNameModal = () => setEditNameModalOpen(false);
+  const handleOpenEditProfileModal = () => {
+    setName(user?.name || '');
+    setLastname(user?.lastname || '');
+    setEmail(user?.email || '');
+    const rawPhone = user?.phone || '';
+    const matched = DIAL_CODES.find((d) => rawPhone.startsWith(d.code));
+    if (matched) {
+      setDialCode(matched.code);
+      setPhone(rawPhone.slice(matched.code.length));
+    } else {
+      setDialCode('+502');
+      setPhone(rawPhone);
+    }
+    setFieldErrors({});
+    setSubmitError('');
+    setEditProfileModalOpen(true);
+  };
+  const handleCloseEditProfileModal = () => setEditProfileModalOpen(false);
+
+  const validateFields = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (email && !EMAIL_REGEX.test(email)) {
+      errors.email = t('userProfile.emailInvalid', 'Invalid email format');
+    }
+    if (phone && !PHONE_REGEX.test(phone)) {
+      errors.phone = t('userProfile.phoneInvalid', 'Invalid phone format');
+    }
+    if (!email.trim() && !phone.trim()) {
+      errors.email = t('userProfile.emailPhoneRequired', 'At least email or phone is required');
+      errors.phone = t('userProfile.emailPhoneRequired', 'At least email or phone is required');
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSaveProfile = async () => {
+    if (!validateFields()) return;
+    setSubmitError('');
+    try {
+      await handleUpdateUserInfo({
+        name: name.trim() || null,
+        lastname: lastname.trim() || null,
+        email: email.trim() || null,
+        phone: phone.trim() ? `${dialCode}${phone.trim()}` : null,
+      });
+      setSuccessOpen(true);
+      handleCloseEditProfileModal();
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string }; message?: string };
+      const msg =
+        apiErr?.data?.message ||
+        apiErr?.message ||
+        t('userProfile.updateError', 'Failed to update profile');
+      setSubmitError(msg);
+    }
+  };
 
 
   return (
+    <>
     <Grid
       container
       spacing={2}
@@ -62,55 +133,76 @@ export const UserProfile: React.FC = () => {
         mb: 12,
       }}
     >
-      <Grid
-        size={{ xs: 12, md: 6, lg: 4, xl: 3 }}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mb: { xs: 4, sm: 6 },
-          mt: { xs: 4, sm: 6 },
-        }}
-      >
-        <AvatarUpload
-          previewImage={previewImage}
-          userAvatarUrl={user?.avatarUrl || ''}
-          handleImageChange={(e) => {
-            handleImageChange(e);
-            setModalOpen(true);
+      {/* Avatar section */}
+      <Grid size={{ xs: 10, md: 8, lg: 6, xl: 5 }} sx={{ mt: { xs: 3, sm: 5 } }}>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 4,
+            overflow: 'hidden',
+            bgcolor: 'background.paper',
+            boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.08)',
           }}
-          errorMsg={errorMsg}
-        />
+        >
+          <Box
+            sx={{
+              height: 80,
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+            }}
+          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: -7, pb: 3, px: 2 }}>
+            <AvatarUpload
+              previewImage={previewImage}
+              userAvatarUrl={user?.avatarUrl || ''}
+              name={user?.name || ''}
+              lastname={user?.lastname || ''}
+              handleImageChange={(e) => { handleImageChange(e); setModalOpen(true); }}
+              errorMsg={errorMsg}
+            />
+            <TextAtom variant="headline" size="small" sx={{ mt: 1, fontWeight: 700 }}>
+              {user?.name || 'Name'} {user?.lastname || 'Lastname'}
+            </TextAtom>
+            <Chip
+              label={isMerchant ? t('userProfile.roleMerchant', 'Professional') : t('userProfile.roleUser', 'User')}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{ mt: 1, fontWeight: 600 }}
+            />
+            <ButtonAtom
+              variant="text"
+              endIcon={<EditIcon fontSize="small" />}
+              sx={{ mt: 1.5, textTransform: 'none', color: theme.palette.text.secondary, width: '30%' }}
+              onClick={handleOpenEditProfileModal}
+            >
+              {t('userProfile.editProfile', 'Edit Profile')}
+            </ButtonAtom>
+          </Box>
+        </Paper>
+
         <ModalComponent
           open={modalOpen}
           onClose={handleCloseModal}
           title={t('userProfile.changeProfilePhoto', 'Change profile photo')}
-          onConfirm={handleSaveClick}
+          onConfirm={handleSaveAvatarClick}
           confirmButtonText={t('userProfile.updateButton', 'Update')}
           isConfirmButtonLoading={isUploading}
         >
           <AvatarUpload
             previewImage={previewImage}
             userAvatarUrl={user?.avatarUrl || ''}
+            name={user?.name || ''}
+            lastname={user?.lastname || ''}
             handleImageChange={handleImageChange}
             errorMsg={errorMsg}
           />
         </ModalComponent>
-        <TextAtom variant="title" size="large">
-          {user?.name || 'Name'} {user?.lastname || 'Lastname'}
-        </TextAtom>
-        <ButtonAtom
-          variant="text"
-          sx={{ mt: 1, textTransform: 'none' }}
-          onClick={handleOpenEditNameModal}
-        >
-          {t('userProfile.editName', 'Edit Name')}
-        </ButtonAtom>
+
         <ModalComponent
-          open={editNameModalOpen}
-          onClose={handleCloseEditNameModal}
-          title={t('userProfile.editNameTitle', 'Edit Name')}
-          onConfirm={() => handleUpdateUserInfo({name, lastname})}
+          open={editProfileModalOpen}
+          onClose={handleCloseEditProfileModal}
+          title={t('userProfile.editProfileTitle', 'Edit Profile')}
+          onConfirm={handleSaveProfile}
           confirmButtonText={t('userProfile.save', 'Save')}
         >
           <TextField
@@ -127,62 +219,142 @@ export const UserProfile: React.FC = () => {
             fullWidth
             margin="dense"
           />
+          <TextField
+            label={t('userProfile.email', 'Email')}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setFieldErrors((prev) => ({ ...prev, email: '' }));
+            }}
+            fullWidth
+            margin="dense"
+            type="email"
+            error={!!fieldErrors.email}
+            helperText={fieldErrors.email}
+          />
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end', mt: 1 }}>
+            <FormControl size="small" sx={{ minWidth: 110, mb: '3px' }}>
+              <InputLabel>{t('auth.login.dial_code', 'Code')}</InputLabel>
+              <Select
+                value={dialCode}
+                label={t('auth.login.dial_code', 'Code')}
+                onChange={(e) => setDialCode(e.target.value)}
+                MenuProps={{ PaperProps: { style: { maxHeight: 240 } } }}
+              >
+                {DIAL_CODES.map((d) => (
+                  <MenuItem key={d.code} value={d.code}>{d.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label={t('userProfile.phone', 'Phone')}
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, phone: '' }));
+              }}
+              fullWidth
+              type="tel"
+              error={!!fieldErrors.phone}
+              helperText={fieldErrors.phone}
+            />
+          </Box>
+          {submitError && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {submitError}
+            </Alert>
+          )}
         </ModalComponent>
       </Grid>
 
-      <Grid size={{ xs: 12, md: 8, lg: 6, xl: 5 }}>
+      {/* Profile info list */}
+      <Grid size={{ xs: 10, md: 8, lg: 6, xl: 5 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            borderRadius: 4,
+            overflow: 'hidden',
+            bgcolor: 'background.paper',
+            boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.08)',
+          }}
+        >
         <List sx={{ width: '100%' }}>
-          <ListItem disablePadding>
+          <ListItem
+            disablePadding
+            sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}
+          >
             <ButtonAtom
+              variant="text"
+              fullWidth
+              onClick={handleOpenEditProfileModal}
+              sx={{
+                height: '50px',
+                justifyContent: 'space-between',
+                textTransform: 'none',
+                borderRadius: '0',
+              }}
+            >
+              <TextAtom variant="title" size="medium">
+                {t('userProfile.email', 'Email')}
+              </TextAtom>
+              <TextAtom variant="title" size="medium" sx={{ color: 'text.secondary', fontWeight: 400 }}>
+                {user?.email || '—'}
+              </TextAtom>
+            </ButtonAtom>
+          </ListItem>
+          <ListItem
+            disablePadding
+            sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}
+          >
+            <ButtonAtom
+              variant="text"
+              fullWidth
+              onClick={handleOpenEditProfileModal}
+              sx={{
+                height: '50px',
+                justifyContent: 'space-between',
+                textTransform: 'none',
+                borderRadius: '0',
+              }}
+            >
+              <TextAtom variant="title" size="medium">
+                {t('userProfile.phone', 'Phone')}
+              </TextAtom>
+              <TextAtom variant="title" size="medium" sx={{ color: 'text.secondary', fontWeight: 400 }}>
+                {user?.phone || 'Not provided'}
+              </TextAtom>
+            </ButtonAtom>
+          </ListItem>
+          <ListItem
+            disablePadding
+          >
+            <ButtonAtom
+              onClick={() => navigate('/password-recovery')}
               variant="text"
               fullWidth
               sx={{
                 height: '50px',
                 justifyContent: 'space-between',
                 textTransform: 'none',
-                borderRadius: '0',
-                borderBottom: '1px solid rgb(226, 226, 230)',
               }}
             >
               <TextAtom variant="title" size="medium">
-                {t('userProfile.email', 'Email')}
+                {t('userProfile.changePassword', 'Change password')}
               </TextAtom>
-              <TextAtom variant="title" size="medium">
-                {user?.email || 'email'}
-              </TextAtom>
+              <ArrowForwardIosIcon
+                fontSize="small"
+                sx={{ color: 'primary.main' }}
+              />
             </ButtonAtom>
           </ListItem>
-          {['Cambiar contraseña'].map((item, index) => (
-            <ListItem
-              key={index}
-              disablePadding
-              sx={{ borderBottom: '1px solid rgb(226, 226, 230)' }}
-            >
-              <ButtonAtom
-                onClick={() => navigate('/password-recovery')}
-                variant="text"
-                fullWidth
-                sx={{
-                  height: '50px',
-                  justifyContent: 'space-between',
-                  textTransform: 'none',
-                }}
-              >
-                <TextAtom variant="title" size="medium">
-                  {t('userProfile.changePassword', 'Change password')}
-                </TextAtom>
-                <ArrowForwardIosIcon
-                  fontSize="small"
-                  sx={{ color: '#6750A4' }}
-                />
-              </ButtonAtom>
-            </ListItem>
-          ))}
         </List>
+        </Paper>
       </Grid>
 
+      {/* Action buttons */}
       <Grid
-        size={{ xs: 12, md: 8, lg: 6, xl: 5 }}
+        size={{ xs: 10, md: 8, lg: 6, xl: 5 }}
         sx={{
           display: 'flex',
           flexDirection: { xs: 'column', sm: 'row' },
@@ -199,10 +371,9 @@ export const UserProfile: React.FC = () => {
           onClick={() => handleUpdateUserInfo({roles: isMerchant ? [2] : [2, 3]})}
           sx={{
             fontWeight: 'bold',
-            mr: 2,
             mb: 2,
             mx: { xs: 'auto', sm: 0 },
-            width: { xs: '75%', sm: '200px' },
+            width: { xs: '100%', sm: '300px' },
           }}
         >
           <TextAtom
@@ -218,24 +389,37 @@ export const UserProfile: React.FC = () => {
 
         <ButtonAtom
           variant="filled"
+          startIcon={<LogoutIcon fontSize="small" />}
           onClick={logoutUser}
           sx={{
             fontWeight: 'bold',
             mb: 2,
             mx: { xs: 'auto', sm: 0 },
-            width: { xs: '75%', sm: '200px' },
+            width: { xs: '100%', sm: '200px' },
           }}
         >
           <TextAtom
             variant="title"
             size="medium"
-            sx={{ cursor: 'pointer', textTransform: 'none', mr: 3, ml: 3 }}
+            sx={{ cursor: 'pointer', textTransform: 'none' }}
           >
-            {t('userProfile.logout', 'Logout')}
+            {t('userProfile.logout', 'Sign out')}
           </TextAtom>
         </ButtonAtom>
       </Grid>
     </Grid>
+
+    <Snackbar
+      open={successOpen}
+      autoHideDuration={3000}
+      onClose={() => setSuccessOpen(false)}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    >
+      <Alert severity="success" onClose={() => setSuccessOpen(false)}>
+        {t('userProfile.updateSuccess', 'Profile updated successfully')}
+      </Alert>
+    </Snackbar>
+    </>
   );
 };
 

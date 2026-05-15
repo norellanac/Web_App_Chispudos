@@ -16,29 +16,19 @@ const useUserEvents = () => {
 
   const handleUpdateUserInfo = async (userObjNewFields: UpdateUserPayload) => {
       if (user) {
-        try {
-          const userUpdateResponse = await updateUserInfo({
-            userObj: {
-              ...user,
-              ...userObjNewFields,
-            },
-          }).unwrap();
-          if (userUpdateResponse.success) {
-            dispatch(
-              setAuthUserState({
-                ...userUpdateResponse.data
-              }),
-            );
-            console.error(
-              'User info updated successfully:',
-              userUpdateResponse.data,
-              user
-            );
-          };
-  
-        } catch (error) {
-          console.error('Error updating user info:', error);
-        }
+        const userUpdateResponse = await updateUserInfo({
+          userObj: {
+            ...user,
+            ...userObjNewFields,
+          },
+        }).unwrap();
+        if (userUpdateResponse.success) {
+          dispatch(
+            setAuthUserState({
+              ...userUpdateResponse.data
+            }),
+          );
+        };
       }
     };
 

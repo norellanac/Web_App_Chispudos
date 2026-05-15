@@ -10,16 +10,16 @@
     "authNavItems": {
       "favorites": "Guardados",
       "home": "Inicio",
-      "logout": "Logout",
-      "messages": "Messages",
-      "profile": "Profile",
+      "logout": "Cerrar sesión",
+      "messages": "Mensajes",
+      "profile": "Perfil",
       "tasks": "Tareas"
     },
     "navItems": {
-      "merchant": "Become a Professional",
-      "products": "Products",
-      "professionals": "Professionals",
-      "user": "Switch to User"
+      "merchant": "Convertirse en Profesional",
+      "products": "Productos",
+      "professionals": "Profesionales",
+      "user": "Cambiar a Usuario"
     }
   },
   "auth": {
@@ -37,16 +37,16 @@
     },
     "initialTitle": "",
     "login": {
-      "auth": "Log in or Sign up",
-      "dial_code": "Code",
+      "auth": "Iniciar sesión o Registrarse",
+      "dial_code": "Código de país",
       "dont_have_account": "¿No tienes una cuenta?",
       "email": "Correo electrónico",
-      "email_toggle": "Email",
-      "error": "Login failed",
+      "email_toggle": "Correo electrónico",
+      "error": "Error al iniciar sesión",
       "forgot_password": "¿Olvidaste tu contraseña?",
       "password": "Contraseña",
-      "phone": "Phone number",
-      "phone_toggle": "Phone",
+      "phone": "Número de teléfono",
+      "phone_toggle": "Teléfono",
       "register": "Registrarse",
       "success": "",
       "title": "Iniciar sesión"
@@ -379,18 +379,28 @@
     }
   },
   "userProfile": {
-    "changePassword": "Change password",
-    "changeProfilePhoto": "Change profile photo",
-    "editName": "Edit Name",
-    "editNameTitle": "Edit Name",
-    "email": "Email",
-    "lastname": "Lastname",
-    "logout": "Logout",
-    "name": "Name",
-    "save": "Save",
-    "switchToMerchant": "Become a Professional",
-    "switchToUser": "Switch to User",
-    "updateButton": "Update"
+    "changePassword": "Cambiar contraseña",
+    "changeProfilePhoto": "Cambiar foto de perfil",
+    "editName": "Editar nombre",
+    "editNameTitle": "Editar nombre",
+    "editProfile": "Editar perfil",
+    "editProfileTitle": "Editar perfil",
+    "email": "Correo electrónico",
+    "emailInvalid": "Formato de correo inválido",
+    "emailPhoneRequired": "Se requiere al menos correo o teléfono",
+    "lastname": "Apellido",
+    "logout": "Cerrar sesión",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "phoneInvalid": "Formato de teléfono inválido",
+    "roleMerchant": "Profesional",
+    "roleUser": "Usuario",
+    "save": "Guardar",
+    "switchToMerchant": "Convertirme en Profesional",
+    "switchToUser": "Cambiar a Usuario",
+    "updateButton": "Actualizar",
+    "updateError": "Error al actualizar el perfil",
+    "updateSuccess": "Perfil actualizado correctamente"
   },
   "welcomeBanner": {
     "greeting": "¡Hola, {{userName}}! ¿Qué necesitás resolver hoy?"
